@@ -83,5 +83,47 @@ async def process_help_command(message: Message):
                          '/custom - вывод показателей пользовательского диапазона\n'
                          '/history - Выводит историю запросов пользователя')
 
+@dp.message(Command(commands=['low']))
+async def process_low_command(message: Message):
+    creds = None
+    if os.path.exists('token.json'):
+        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                'credentials.json', SCOPES)
+            creds = flow.run_local_server(port=0)
+
+        with open('token.json', 'w') as token:
+            token.write(creds.to_json())
+
+    try:
+        # Получение данных из таблицы
+        service = build('sheets', 'v4', credentials=creds)
+        sheet = service.spreadsheets()
+        result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID, range=SAMPLE_RANGE_NAME).execute()
+        values = result.get('values', [])
+
+        # Если данных нет выводит сообщение об их отсутствии
+        if not values:
+            await message.answer("Данные не обнаружены")
+            return
+        money = {}
+        for row in values:
+            count = 0  # счетчик для подсчета ячеек со значением "(+)"
+            for cell in row:
+                if cell == '(+)':
+                    count += 1
+            money[row[1]] = count
+
+        for k, v in money.items():
+            if v < 5:
+                await message.answer(f'Имя ребенка {k} - кол-во посещений {v} на сумму {v * 400}')
+    except HttpError as err:
+        await message.answer(f'Произошла ошибка: {err}')
+
 if __name__ == '__main__':
     dp.run_polling(bot)
