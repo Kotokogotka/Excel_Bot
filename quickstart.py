@@ -74,5 +74,14 @@ async def process_start_foo(message: Message):
         await message.answer(f'Произошла ошибка: {err}')
 
 
+@dp.message(Command(commands=['help']))
+async def process_help_command(message: Message):
+    await message.answer('Описание команд которые ты можешь выполнить\n'
+                         '/start - Выводит список с фамилию, имя ребенка,а так же сумму к оплаты за месяц занятий\n'
+                         '/low - Выводит фамилию и имя ребенка с минимальной суммы оплаты за данный месяц\n'
+                         '/high - Выводит фамилии и имена детей с максимальной посещаемостью в данном месяце\n'
+                         '/custom - вывод показателей пользовательского диапазона\n'
+                         '/history - Выводит историю запросов пользователя')
+
 if __name__ == '__main__':
     dp.run_polling(bot)
