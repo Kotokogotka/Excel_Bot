@@ -55,18 +55,19 @@ async def process_start_foo(message: Message):
     :return:
     """
     creds = None
-    if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+    if os.path.exists('../token.json'):
+        creds = Credentials.from_authorized_user_file('../token.json', SCOPES)
 
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPES)
+            flow = InstalledAppFlow.from_client_secrets_file(r'C:\Users\asics\Desktop\ExcelBOT\credentials.json',
+                                                             SCOPES)
+
             creds = flow.run_local_server(port=0)
 
-        with open('token.json', 'w') as token:
+        with open('../token.json', 'w') as token:
             token.write(creds.to_json())
 
     try:
@@ -85,15 +86,16 @@ async def process_start_foo(message: Message):
 
         info_mess = 'Информация о посещаемости и стоимости занятии за месяц для каждого ребенка: \n\n'
         money = {}
-        for row in values:
-            count = 0  # счетчик для подсчета ячеек со значением "(+)"
-            for cell in row:
-                if cell == '(+)':
-                    count += 1
-            money[row[1]] = count
-        await message.answer(info_mess)
-        for k, v in money.items():
-            await message.answer(f'Имя {k} - Сумма к оплате {v} рублей')
+        with open(os.path.join(os.path.dirname("C:\\Users\\asics\\Desktop\\ExcelBOT\\start"), 'start.txt'), "w", encoding='utf-8') as start_file:
+            for row in values:
+                count = 0  # счетчик для подсчета ячеек со значением "(+)"
+                for cell in row:
+                    if cell == '(+)':
+                        count += 1
+                start_file.write(f'- {row[1]} - сумма к оплате {count * 400}\n')
+        with open('start.txt', 'r', encoding='utf-8') as read_file:
+            text = read_file.read()
+            await message.answer(text)
     except HttpError as err:
         await message.answer(f'Произошла ошибка: {err}')
 
@@ -109,29 +111,37 @@ async def process_help_command(message: Message):
                          '/history - Выводит историю запросов пользователя')
 
 
-# Команда /low сортирует по кол-во посещений (от большего к меньшему)
+# Обработчик команды /start
 @dp.message(Command(commands=['low']))
-async def process_low_command(message: Message):
+async def process_start_foo(message: Message):
+    """
+    Обработчик команды /start
+    :param message:
+    :return:
+    """
     creds = None
-    if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+    if os.path.exists('../token.json'):
+        creds = Credentials.from_authorized_user_file('../token.json', SCOPES)
 
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPES)
+            flow = InstalledAppFlow.from_client_secrets_file(r'C:\Users\asics\Desktop\ExcelBOT\credentials.json',
+                                                             SCOPES)
+
             creds = flow.run_local_server(port=0)
 
-        with open('token.json', 'w') as token:
+        with open('../token.json', 'w') as token:
             token.write(creds.to_json())
 
     try:
         # Получение данных из таблицы
         service = build('sheets', 'v4', credentials=creds)
+
         sheet = service.spreadsheets()
-        result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID, range=SAMPLE_RANGE_NAME).execute()
+        result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID,
+                                    range=SAMPLE_RANGE_NAME).execute()
         values = result.get('values', [])
 
         # Если данных нет выводит сообщение об их отсутствии
@@ -145,48 +155,61 @@ async def process_low_command(message: Message):
                 if cell == '(+)':
                     count += 1
             money[row[1]] = count
-        sort_dict_value_high = sorted(money.values(), reverse=True)
+        sorted_value = sorted(money.values(), reverse=True)
         result_sort = {}
-        for i_value in sort_dict_value_high:
+        for i_value in sorted_value:
             for k_value in money.keys():
                 if money[k_value] == i_value:
                     result_sort[k_value] = money[k_value]
-        for k, v in result_sort.items():
-            await message.answer(f'{k}, {v}')
+        with open('low.txt', 'w', encoding='utf-8') as low:
+            for k, v in result_sort.items():
+                low.write(f'{k} - {v}\n')
+        with open('low.txt', 'r', encoding='utf-8') as file:
+            text = file.read()
+            await message.answer(text)
+
 
     except HttpError as err:
         await message.answer(f'Произошла ошибка: {err}')
 
 
-# Команда /high сортирует по кол-во посещений (от меньшего к большему)
+# Обработчик команды /start
 @dp.message(Command(commands=['high']))
-async def process_low_command(message: Message):
+async def process_start_foo(message: Message):
+    """
+    Обработчик команды /start
+    :param message:
+    :return:
+    """
     creds = None
-    if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+    if os.path.exists('../token.json'):
+        creds = Credentials.from_authorized_user_file('../token.json', SCOPES)
 
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPES)
+            flow = InstalledAppFlow.from_client_secrets_file(r'C:\Users\asics\Desktop\ExcelBOT\credentials.json',
+                                                             SCOPES)
+
             creds = flow.run_local_server(port=0)
 
-        with open('token.json', 'w') as token:
+        with open('../token.json', 'w') as token:
             token.write(creds.to_json())
 
     try:
         # Получение данных из таблицы
         service = build('sheets', 'v4', credentials=creds)
+
         sheet = service.spreadsheets()
-        result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID, range=SAMPLE_RANGE_NAME).execute()
+        result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID,
+                                    range=SAMPLE_RANGE_NAME).execute()
         values = result.get('values', [])
 
         # Если данных нет выводит сообщение об их отсутствии
         if not values:
             await message.answer("Данные не обнаружены")
-
+            return
         money = {}
         for row in values:
             count = 0  # счетчик для подсчета ячеек со значением "(+)"
@@ -194,14 +217,20 @@ async def process_low_command(message: Message):
                 if cell == '(+)':
                     count += 1
             money[row[1]] = count
-        sort_dict_value_high = sorted(money.values())
+        sorted_value = sorted(money.keys())
         result_sort = {}
-        for i_value in sort_dict_value_high:
+        for i_value in sorted_value:
             for k_value in money.keys():
                 if money[k_value] == i_value:
                     result_sort[k_value] = money[k_value]
-        for k, v in result_sort.items():
-            await message.answer(f'{k}, {v}')
+        with open('high.txt', 'w', encoding='utf-8') as high:
+            for k, v in result_sort.items():
+                high.write(f'{k} - {v}\n')
+        with open('high.txt', 'r', encoding='utf-8') as file:
+            text = file.read()
+            await message.answer(text)
+
+
     except HttpError as err:
         await message.answer(f'Произошла ошибка: {err}')
 
