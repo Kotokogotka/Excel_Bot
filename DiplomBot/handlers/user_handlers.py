@@ -45,8 +45,8 @@ async def process_choice_button(message: Message):
 
 # Хандлер срабатывает на команду/custom
 @router.message(Command(commands=['/custom']))
-async def process_custom_command(message: Message):
-    for name in get_google_sheet_api()
+async def process_custom_process(message: Message):
+    async def custom_command_handler(message: Message):
 
 
 
