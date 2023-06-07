@@ -43,10 +43,18 @@ async def process_help_command(message: Message):
 async def process_choice_button(message: Message):
     await message.answer(text='Выберите действие')
 
-# Хандлер срабатывает на команду/custom
+number_training = {1: 'G', 2: 'I', 3: 'K', 4: 'M', 5: 'O', 6: 'Q', 7: 'S', 8: 'U', 9: 'W'}
+
 @router.message(Command(commands=['/custom']))
 async def process_custom_process(message: Message):
-    async def custom_command_handler(message: Message):
+    training = await message.answer('Введите номер тренировки', reply_markup=nums_keyboard) # Номер тренировки
+    symbol = await message.answer('Введите символ ', reply_markup=keyboard) # Символ
+    values = get_sheet_data()
+    name_row = [row[0] for row in values]
+    process_sheet_data(training, symbol, number_training)
+    cnt = sum(1 for name in name_row if name in values)
+    text = f'Обновлено {cnt} ячеек'
+    await message.answer(text)
 
 
 
