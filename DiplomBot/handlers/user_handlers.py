@@ -43,18 +43,46 @@ async def process_help_command(message: Message):
 async def process_choice_button(message: Message):
     await message.answer(text='Выберите действие')
 
-number_training = {1: 'G', 2: 'I', 3: 'K', 4: 'M', 5: 'O', 6: 'Q', 7: 'S', 8: 'U', 9: 'W'}
-
-@router.message(Command(commands=['/custom']))
-async def process_custom_process(message: Message):
-    training = await message.answer('Введите номер тренировки', reply_markup=nums_keyboard) # Номер тренировки
-    symbol = await message.answer('Введите символ ', reply_markup=keyboard) # Символ
-    values = get_sheet_data()
-    name_row = [row[0] for row in values]
-    process_sheet_data(training, symbol, number_training)
-    cnt = sum(1 for name in name_row if name in values)
-    text = f'Обновлено {cnt} ячеек'
-    await message.answer(text)
+@router.message(Command(commands=['custom']))
+async def process_custom_process(message: Message, state: FSMContext):
+    await state.set_state('waiting_for_training_number')  # Установка состояния ожидания ввода номера тренировки
+    await message.answer('Выберите номер тренировки', reply_markup=nums_keyboard)
+    
 
 
+
+
+
+@router.callback_query(lambda c: c.data == '1')
+async def process_callback_one(callback_query: CallbackQuery, state: FSMContext):
+    # Получаем номер тренировки из колбека
+    training_number = 1
+
+    # Получаем символ из состояния FSMContext
+    symbol = await state.get_state()
+
+    # Вызываем функцию process_sheet_data
+    process_sheet_data(training_number, symbol)
+
+    # Отправляем ответ пользователю
+    await callback_query.answer('Действия успешно выполнены')
+
+@router.callback_query(lambda c: c.data == '2')
+async def process_callback_one(callback_query: CallbackQuery, state: FSMContext):
+    # Получаем номер тренировки из колбека
+    training_number = 2
+
+    # Получаем символ из состояния FSMContext
+    symbol = await state.get_state()
+
+    # Проверяем, что символ не является None, чтобы избежать нежелательного заполнения таблицы
+    if symbol is not None:
+        # Вызываем функцию process_sheet_data
+        process_sheet_data(training_number, symbol)
+
+        # Отправляем ответ пользователю
+        await callback_query.answer('Действия успешно выполнены')
+    else:
+        # Если символ None, выводим сообщение об ошибке
+        await callback_query.answer('Ошибка: символ не выбран')
 
