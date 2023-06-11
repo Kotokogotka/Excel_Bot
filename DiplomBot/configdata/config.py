@@ -84,7 +84,7 @@ def get_sheet_data():
     values = result.get('values', [])
     return values
 
-
+number_training = {1: 'G', 2: 'I', 3: 'K', 4: 'M', 5: 'O', 6: 'Q', 7: 'S', 8: 'U', 9: 'W'}
 
 def process_sheet_data(training, symbol, number_training):
     values = get_sheet_data()
@@ -100,5 +100,4 @@ def process_sheet_data(training, symbol, number_training):
             cell = f'{number_training[training]}{17 + cnt}'
             update_cell_value(cell, symbol)
             cnt += 1
-        else:
-            print(f'Ошибка: Значение {name} не найдено в таблице.')
+        
