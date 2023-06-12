@@ -1,3 +1,7 @@
+from datetime import date
+
+date_day: int = date.today().day
+
 LEXICON_RU: dict[str, str] = {
     '/start': f'Посещаемость на {date_day} число',
     '/help': f'Данный бот помогает следить за посещаемостью детей\n\nКоманда /start '
