@@ -44,47 +44,46 @@ async def process_cancel_command_state(message: Message, state: FSMContext):
     await state.clear()
 
 
-# Хандлер срабатывает на команду custom и переводит бота в состояние ожидания ввода номера тренировки
-@router.message(Command(commands='custom'), StateFilter(default_state))
-async def process_custom_command(message: Message, state: FSMContext):
-    await message.answer(text='Введите номер тренировки')
-    # Устанавливаем состояние ожидания ввода
+@router.message(Command(commands='custom'))
+async def process_custom_commnad(message: Message, state: FSMContext):
+    await message.answer(text='Введи номер тренировки от 1 до 9', reply_markup=nums_keyboard)
     await state.set_state(CustomProcessStates.wating_for_number)
 
-
-# Хандлер срабатывает если введено корректное значение от 1 до 9
-# Ожидает ввода символа
-@router.message(StateFilter(CustomProcessStates.wating_for_number),
-                lambda x: x.text.isdigit() and 1 <= int(x.text) <= 9)
-async def process_number_input(message: Message, state: FSMContext):
-    await state.update_data(number=message.text)
-    await message.answer(text='Принял, теперь вводим отметку + - О для каждого ребенка')
+@router.callback_query(CustomProcessStates.wating_for_number)
+async def process_number_press(callback: CallbackQuery, state: FSMContext):
+    number = int(callback.data)
+    await state.update_data(number=number)
+    await callback.message.answer(text=f'Вы ввели {number}')
     await state.set_state(CustomProcessStates.waiting_for_symbol)
 
 
-# Хандлер срабатывает если введено некорректное значение номера тренировки
-@router.message(StateFilter(CustomProcessStates.wating_for_number))
-async def process_warning_number(message: Message):
-    await message.answer(text='Введено не корректное значение, введите цифру от 1 до 9\n\n'
-                              'Если хотите отменить команду, отправьте /cancel')
-
-
-# Хандлер срабатывает если введен корректный
-sym_list = ['+', '-', 'O', 'o', 'о', 'О']
-@router.message(StateFilter(CustomProcessStates.waiting_for_symbol),
-                lambda sym: sym.text.isalpha() and sym in sym_list)
+@router.message(CustomProcessStates.waiting_for_symbol)
 async def process_symbol_input(message: Message, state: FSMContext):
-    # Сохраняю символ в хранилище по ключу symbol
-    await state.update_data(sym=message.text)
-    # Создаю объект инлайн кнопок + -
-    plus = InlineKeyboardButton(text='Присутсвовал',
-                                callback_data='+')
-    minus = InlineKeyboardButton(text='Отсутсвует',
-                                 callback_data='-')
-    good_reason = InlineKeyboardButton(text='Не смог присутсвовать',
-                                       callback_data='O')
-    # Добавляем кнопки в клавиатуру
-    sym_keyboard: list[list[InlineKeyboardButton]] = [[plus, minus, good_reason]]
-    # Создаем объект инлайн клавиатуры
-    markup = InlineKeyboardMarkup(inline_keyboard=sym_keyboard)
-    await message.answer(text='Выберете действие для {name}', reply_markup=markup)
+    data = await state.get_data()
+    number = data.get('number')
+    get_data = get_sheet_data()
+    name_row = [row[0] for row in get_data]
+    index = data.get('index', 0)
+    if index < len(name_row):
+        name = name_row[index]
+        await message.answer(text=f'Введите символ + - 0 для {name}')
+        await state.set_state(CustomProcessStates.waiting_for_symbol)
+        await state.update_data(index=index+1, name=name)
+    else:
+        await message.answer(text='Ввод символов завершен')
+
+
+list_sym = ['+', '-', 'о']
+@router.message(CustomProcessStates.waiting_for_symbol)
+async def process_symbol_input(message: Message, state: FSMContext):
+    data = await state.get_data()
+    number = data.get('number')
+    name = data.get('name')
+    sym = str(message.text)
+    if sym in list_sym:
+        process_sheet_data(number, sym, name)
+        await message.answer(text=f'Изменено для {name[0]}')
+    else:
+        await message.answer(text='Введены не корректные символы')
+    await state.set_state(CustomProcessStates.waiting_for_symbol)
+
