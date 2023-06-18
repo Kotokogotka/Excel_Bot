@@ -81,7 +81,7 @@ async def process_symbol_input(message: Message, state: FSMContext):
     name = data.get('name')
     sym = str(message.text)
     if sym in list_sym:
-        process_sheet_data(number, sym, name)
+        process_sheet_data(number, sym, number_training)
         await message.answer(text=f'Изменено для {name[0]}')
     else:
         await message.answer(text='Введены не корректные символы')
