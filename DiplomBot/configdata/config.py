@@ -88,17 +88,23 @@ def get_sheet_data():
 
 number_training = {1: 'G', 2: 'I', 3: 'K', 4: 'M', 5: 'O', 6: 'Q', 7: 'S', 8: 'U', 9: 'W'}
 
-def process_sheet_data(training, symbol: str, number_training):
+async def process_sheet_data(training, symbol, name, number_training, state: FSMContext):
+    data = await state.get_data()
+    cnt = data.get('cnt', 0)  # Получение значения счетчика из состояния
+
     values = get_sheet_data()
     name_row = [row[0] for row in values]
-    cnt = 0
-    for name in name_row:
-        index = None
-        for i, row in enumerate(values):
-            if row[0] == name:
-                index = i
-                break
-        if index is not None:
-            cell = f'{number_training[training]}{17 + cnt}'
-            update_cell_value(cell, symbol)
-            cnt += 1
+    index = None
+
+    for i, row in enumerate(values):
+        if row[0] == name:
+            index = i
+            break
+
+    if index is not None:
+        row_number = 17 + cnt
+        column = number_training[training]
+        update_cell_value(row_number, column, symbol)
+        cnt += 1
+
+    await state.update_data(cnt=cnt)
