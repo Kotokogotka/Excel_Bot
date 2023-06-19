@@ -57,33 +57,30 @@ async def process_number_press(callback: CallbackQuery, state: FSMContext):
     await state.set_state(CustomProcessStates.waiting_for_symbol)
 
 
+list_sym = ['+', '-', 'o']
 @router.message(CustomProcessStates.waiting_for_symbol)
-async def process_symbol_input(message: Message, state: FSMContext):
+async def process_change_sheet(message: Message, state: FSMContext):
     data = await state.get_data()
     number = data.get('number')
-    get_data = get_sheet_data()
-    name_row = [row[0] for row in get_data]
     index = data.get('index', 0)
+    name_row = [row[0] for row in get_sheet_data()]
     if index < len(name_row):
         name = name_row[index]
-        await message.answer(text=f'Введите символ + - 0 для {name}')
-        await state.set_state(CustomProcessStates.waiting_for_symbol)
-        await state.update_data(index=index+1, name=name)
+        sym = str(message.text)
+        if sym in list_sym:
+            await process_sheet_data(number, sym, name, number_training, state)  # Передача всех аргументов
+            await message.answer(text=f'Изменено для {name}')
+            index += 1  # Увеличение значения индекса
+            if index < len(name_row):
+                name = name_row[index]
+                await message.answer(text=f'Введите символ + - 0 для {name}')
+                await state.update_data(index=index)  # Обновление данных состояния
+            else:
+                await message.answer(text='Ввод символов завершен')
+                await state.clear()
+        else:
+            await message.answer(text='Введены некорректные символы')
     else:
         await message.answer(text='Ввод символов завершен')
-
-
-list_sym = ['+', '-', 'о']
-@router.message(CustomProcessStates.waiting_for_symbol)
-async def process_symbol_input(message: Message, state: FSMContext):
-    data = await state.get_data()
-    number = data.get('number')
-    name = data.get('name')
-    sym = str(message.text)
-    if sym in list_sym:
-        process_sheet_data(number, sym, number_training)
-        await message.answer(text=f'Изменено для {name[0]}')
-    else:
-        await message.answer(text='Введены не корректные символы')
-    await state.set_state(CustomProcessStates.waiting_for_symbol)
+        await state.clear()
 
