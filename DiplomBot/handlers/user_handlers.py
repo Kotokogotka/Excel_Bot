@@ -66,15 +66,17 @@ async def process_change_sheet(message: Message, state: FSMContext):
     name_row = [row[0] for row in get_sheet_data()]
     if index < len(name_row):
         name = name_row[index]
+        if index == 0:
+            await message.answer(text=f'Введите символ + - 0 для {name}')
         sym = str(message.text)
         if sym in list_sym:
-            await process_sheet_data(number, sym, name, number_training, state)  # Передача всех аргументов
+            await process_sheet_data(number, sym, name, number_training, state)
             await message.answer(text=f'Изменено для {name}')
-            index += 1  # Увеличение значения индекса
+            index += 1
             if index < len(name_row):
                 name = name_row[index]
                 await message.answer(text=f'Введите символ + - 0 для {name}')
-                await state.update_data(index=index)  # Обновление данных состояния
+                await state.update_data(index=index)
             else:
                 await message.answer(text='Ввод символов завершен')
                 await state.clear()
