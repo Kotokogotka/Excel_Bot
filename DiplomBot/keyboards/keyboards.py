@@ -3,19 +3,6 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from lexicon.lexicon import LEXICON_RU
 from configdata.config import number_training
 
-# Создаем объект с кнопками
-button_plus: KeyboardButton = KeyboardButton(text=LEXICON_RU['+'])
-button_minus: KeyboardButton = KeyboardButton(text=LEXICON_RU['-'])
-button_absent: KeyboardButton = KeyboardButton(text=LEXICON_RU['O'])
-
-# Инициализируем клавиатуру с кнопками
-my_kb: ReplyKeyboardBuilder = ReplyKeyboardBuilder()
-
-# Добавляем кнопки в билдер с параметром width=3
-my_kb.row(button_plus, button_minus, button_absent, width=3)
-
-# Создаем клавиатуру с кнопками + - О
-keyboard = my_kb.as_markup(one_time_keyboard=True, resize_keyboard=True)
 
 button_1: InlineKeyboardButton = InlineKeyboardButton(text='1', callback_data='1')
 button_2: InlineKeyboardButton = InlineKeyboardButton(text='2', callback_data='2')
@@ -37,3 +24,16 @@ nums_keyboard: InlineKeyboardMarkup = InlineKeyboardMarkup(
                      [button_7],
                      [button_8],
                      [button_9]])
+
+
+
+button_1: KeyboardButton = KeyboardButton(text=LEXICON_RU['plus'])
+button_2: KeyboardButton = KeyboardButton(text=LEXICON_RU['minus'])
+button_3: KeyboardButton = KeyboardButton(text=LEXICON_RU['absent'])
+
+
+sym_kb: ReplyKeyboardMarkup = ReplyKeyboardMarkup(
+                                    keyboard=[[button_1],
+                                              [button_2],
+                                              [button_3]],
+                                    resize_keyboard=True, one_time_keyboard=True)
