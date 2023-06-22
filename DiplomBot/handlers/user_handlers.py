@@ -27,6 +27,11 @@ async def process_start_command(message: Message):
                               'Хорошего дня и продуктивной тренировки!')
 
 
+@router.message(Command(commands='help'))
+async def process_help_command(message: Message):
+    await message.answer(text=f'{LEXICON_RU["/help"]}')
+
+
 # Хандлер срабатывает на команду statistic выводя информацию о посещаемости
 @router.message(Command(commands='statistic'))
 async def process_statistic_command(message: Message):
@@ -105,3 +110,10 @@ async def process_change_sheet(message: Message, state: FSMContext):
         await message.answer(text='Ввод символов завершен')
         await state.clear()
 
+
+# Этот хэндлер будет срабатывать на любые сообщения, кроме тех
+# для которых есть отдельные хэндлеры, вне состояний
+@router.message(StateFilter(default_state))
+async def send_echo(message: Message):
+    await message.reply(text='Бот вас не понял!\n\n '
+                             'Воспользуйтесь командой /start или /help если имеются вопросы.')
