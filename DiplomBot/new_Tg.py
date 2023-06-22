@@ -5,6 +5,7 @@ from aiogram import Bot, Dispatcher
 from configdata.config import Config, load_config
 from handlers import user_handlers
 from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.types import BotCommand
 
 # Инициализируем логгер
 logger = logging.getLogger(__name__)
@@ -32,7 +33,20 @@ async def main():
     # Региистрация роутера в диспатчере
     dp.include_router(user_handlers.router)
 
+    main_menu_commands = [
+        BotCommand(command='/help',
+                   description='Справка о работе бота'),
+        BotCommand(command='/start',
+                   description='Запуск бота'),
+        BotCommand(command='/statistic',
+                   description='Узнать посещаемость'),
+        BotCommand(command='/custom',
+                   description='Отметить детей'),
+        BotCommand(command='cancel',
+                   description='Прервать действие')]
 
+    # Установка меню
+    await bot.set_my_commands(main_menu_commands)
     # Пропускаем апдейты и запускаем пулинг
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
