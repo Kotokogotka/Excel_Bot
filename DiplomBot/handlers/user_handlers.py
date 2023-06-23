@@ -21,6 +21,7 @@ class CustomProcessStates(StatesGroup):
 @router.message(CommandStart(), StateFilter(default_state))
 async def process_start_command(message: Message):
     await message.answer(text='Продуктивной тренировки тебе\n\n'
+                              'Подробная информация о работе бота и функций /help\n\n'
                               'Чтобы посмотреть посещаемость введи или кликни на команду /statistic\n\n'
                               'Чтобы отметить будущих чемпионов тебе понадобиться команда /custom\n\n'
                               'Чтобы отменить выполнение команды нажмите или введите /cancel\n\n'
