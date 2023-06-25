@@ -11,7 +11,6 @@ from aiogram import Router
 import googleapiclient.discovery
 
 
-
 @dataclass
 class TgBot:
     token: str  # Токен для доступа к телеграм боту
@@ -85,26 +84,20 @@ def get_sheet_data():
     values = result.get('values', [])
     return values
 
-
 number_training = {1: 'G', 2: 'I', 3: 'K', 4: 'M', 5: 'O', 6: 'Q', 7: 'S', 8: 'U', 9: 'W'}
 
-async def process_sheet_data(training, symbol, name, number_training, state: FSMContext):
-    data = await state.get_data()
-    cnt = data.get('cnt', 0)  # Получение значения счетчика из состояния
-
+def process_sheet_data(training, symbol, number_training):
     values = get_sheet_data()
     name_row = [row[0] for row in values]
-    index = None
-
-    for i, row in enumerate(values):
-        if row[0] == name:
-            index = i
-            break
-
-    if index is not None:
-        row_number = 17 + cnt
-        column = number_training[training]
-        update_cell_value(row_number, column, symbol)
-        cnt += 1
-
-    await state.update_data(cnt=cnt)
+    cnt = 0
+    for name in name_row:
+        index = None
+        for i, row in enumerate(values):
+            if row and row[0] == name:
+                index = i
+                break
+        if index is not None:
+            cell = f'{number_training[training]}{17 + cnt}'
+            update_cell_value(cell, symbol)
+            cnt += 1
+        
